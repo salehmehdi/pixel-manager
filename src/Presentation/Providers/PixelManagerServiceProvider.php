@@ -106,14 +106,24 @@ class PixelManagerServiceProvider extends ServiceProvider
     {
         $this->app->singleton(CredentialsRepositoryInterface::class, function ($app) {
             $config = $app->make(ConfigService::class);
+            $driver = config('pixel-manager.driver', 'mongodb');
 
-            // Create base MongoDB repository
-            $baseRepo = new MongoDBCredentialsRepository(
-                $config->getDbConnection(),
-                $config->getApplicationsCollection(),
-                new CredentialsMapper(),
-                $app->make(CredentialsEncryptorInterface::class)
-            );
+            // Create base repository based on driver
+            if ($driver === 'sql') {
+                $baseRepo = new \MehdiyevSignal\PixelManager\Infrastructure\Persistence\SQL\SQLCredentialsRepository(
+                    config('pixel-manager.sql.connection', 'mysql'),
+                    config('pixel-manager.sql.credentials_table', 'pixel_manager_credentials'),
+                    $app->make(CredentialsEncryptorInterface::class)
+                );
+            } else {
+                // Default: MongoDB
+                $baseRepo = new MongoDBCredentialsRepository(
+                    $config->getDbConnection(),
+                    $config->getApplicationsCollection(),
+                    new CredentialsMapper(),
+                    $app->make(CredentialsEncryptorInterface::class)
+                );
+            }
 
             // Wrap with caching decorator if enabled
             if ($config->isCachingEnabled()) {
@@ -129,7 +139,17 @@ class PixelManagerServiceProvider extends ServiceProvider
 
         $this->app->singleton(EventLogRepositoryInterface::class, function ($app) {
             $config = $app->make(ConfigService::class);
+            $driver = config('pixel-manager.driver', 'mongodb');
 
+            // Create repository based on driver
+            if ($driver === 'sql') {
+                return new \MehdiyevSignal\PixelManager\Infrastructure\Persistence\SQL\SQLEventLogRepository(
+                    config('pixel-manager.sql.connection', 'mysql'),
+                    config('pixel-manager.sql.events_table', 'pixel_manager_events')
+                );
+            }
+
+            // Default: MongoDB
             return new MongoDBEventLogRepository(
                 $config->getDbConnection(),
                 $config->getEventCollection()

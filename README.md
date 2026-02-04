@@ -27,13 +27,17 @@ A powerful, production-ready Laravel package for tracking and distributing custo
 - 🔐 **SHA256 Hashing**: Privacy-compliant PII handling
 - 🌍 **33 Currencies**: Including AZN (Azerbaijani Manat) 🇦🇿
 - 🐛 **All Bugs Fixed**: Meta, Google, Pinterest issues resolved
+- 🗄️ **SQL Support**: MySQL, PostgreSQL, SQLite (in addition to MongoDB)
+- 🔧 **Extensible**: Easy to add new platforms and events
 
 ## Requirements
 
 - PHP 8.2 or higher
 - Laravel 11.0 or higher
-- MongoDB extension and driver
+- Database: MongoDB **OR** SQL (MySQL/PostgreSQL/SQLite)
 - Queue driver (Redis, Database, etc.)
+
+**Note:** You can use either MongoDB or SQL - both are supported!
 
 ## Installation
 
@@ -330,6 +334,15 @@ Check individual platform action logs:
 ```bash
 tail -f storage/logs/laravel.log | grep "Brevo\|Meta\|Google"
 ```
+
+## Extensibility
+
+Want to add a new platform or event? The package is fully extensible!
+
+- **[Extensibility Guide](EXTENSIBILITY.md)** - How to add new platforms, events, and decorators
+- **[SQL Setup Guide](SQL-SETUP.md)** - How to use SQL instead of MongoDB
+
+The DDD architecture makes it easy to extend without modifying core code.
 
 ## Security
 

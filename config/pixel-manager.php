@@ -14,12 +14,47 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | MongoDB Connection
+    | Database Driver
     |--------------------------------------------------------------------------
     |
-    | Configure the MongoDB connection and collection names for event logging.
+    | Choose the database driver for storing credentials and event logs.
+    | Supported: 'mongodb', 'sql'
+    |
+    | - mongodb: Uses MongoDB collections (default)
+    | - sql: Uses SQL tables (MySQL, PostgreSQL, SQLite, etc.)
     |
     */
+    'driver' => env('PIXEL_MANAGER_DRIVER', 'mongodb'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | MongoDB Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure MongoDB connection and collection names (when driver is 'mongodb').
+    |
+    */
+    'mongodb' => [
+        'connection' => env('PIXEL_MANAGER_DB_CONNECTION', 'mongodb'),
+        'applications_collection' => env('PIXEL_MANAGER_APPLICATIONS_COLLECTION', 'applications'),
+        'events_collection' => env('PIXEL_MANAGER_COLLECTION', 'mp_customer_event'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SQL Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure SQL connection and table names (when driver is 'sql').
+    |
+    */
+    'sql' => [
+        'connection' => env('PIXEL_MANAGER_SQL_CONNECTION', 'mysql'),
+        'credentials_table' => 'pixel_manager_credentials',
+        'events_table' => 'pixel_manager_events',
+    ],
+
+    // Legacy support - will be removed in v3.0
     'connection' => env('PIXEL_MANAGER_DB_CONNECTION', 'mongodb'),
     'collection' => env('PIXEL_MANAGER_COLLECTION', 'mp_customer_event'),
     'applications_collection' => env('PIXEL_MANAGER_APPLICATIONS_COLLECTION', 'applications'),
