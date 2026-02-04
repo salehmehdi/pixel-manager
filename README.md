@@ -34,14 +34,33 @@ A powerful, production-ready Laravel package for tracking and distributing custo
 
 - PHP 8.2 or higher
 - Laravel 11.0 or higher
-- Database: MongoDB **OR** SQL (MySQL/PostgreSQL/SQLite)
 - Queue driver (Redis, Database, etc.)
+- Database (optional): MongoDB **OR** SQL (MySQL/PostgreSQL/SQLite)
 
-**Note:** You can use either MongoDB or SQL - both are supported!
+**Note:** Database is optional! You can store credentials in `.env` for quick setup.
 
 ## Installation
 
-Install the package via Composer:
+### ⚡ Quick Start (5 minutes)
+
+For simple setups without database configuration:
+
+```bash
+composer require mehdiyev-signal/pixel-manager
+```
+
+Add credentials to `.env`:
+```env
+PIXEL_MANAGER_DRIVER=env
+PIXEL_META_PIXEL_ID=your_pixel_id
+PIXEL_META_ACCESS_TOKEN=your_token
+```
+
+**Done!** See **[QUICK-START.md](QUICK-START.md)** for details.
+
+### 📚 Full Installation
+
+For multi-environment or advanced setups:
 
 ```bash
 composer require mehdiyev-signal/pixel-manager
@@ -334,6 +353,11 @@ Check individual platform action logs:
 ```bash
 tail -f storage/logs/laravel.log | grep "Brevo\|Meta\|Google"
 ```
+
+## Getting Started
+
+- **[⚡ Quick Start](QUICK-START.md)** - Get started in 5 minutes without database
+- **[🔑 APP_ID Guide](APP-ID-GUIDE.md)** - Understand application ID configuration
 
 ## Extensibility
 

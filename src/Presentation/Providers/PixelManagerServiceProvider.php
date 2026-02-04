@@ -109,7 +109,10 @@ class PixelManagerServiceProvider extends ServiceProvider
             $driver = config('pixel-manager.driver', 'mongodb');
 
             // Create base repository based on driver
-            if ($driver === 'sql') {
+            if ($driver === 'env') {
+                // Simple mode: Read from .env file
+                return new \MehdiyevSignal\PixelManager\Infrastructure\Persistence\Env\EnvCredentialsRepository();
+            } elseif ($driver === 'sql') {
                 $baseRepo = new \MehdiyevSignal\PixelManager\Infrastructure\Persistence\SQL\SQLCredentialsRepository(
                     config('pixel-manager.sql.connection', 'mysql'),
                     config('pixel-manager.sql.credentials_table', 'pixel_manager_credentials'),
@@ -125,7 +128,7 @@ class PixelManagerServiceProvider extends ServiceProvider
                 );
             }
 
-            // Wrap with caching decorator if enabled
+            // Wrap with caching decorator if enabled (not needed for env mode)
             if ($config->isCachingEnabled()) {
                 return new CachedCredentialsRepository(
                     $baseRepo,
