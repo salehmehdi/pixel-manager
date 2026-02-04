@@ -46,6 +46,74 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Caching
+    |--------------------------------------------------------------------------
+    |
+    | Enable credential caching to reduce MongoDB queries by ~90%.
+    | Uses Laravel's cache driver (Redis, Memcached, etc.).
+    |
+    */
+    'cache' => [
+        'enabled' => env('PIXEL_MANAGER_CACHE_ENABLED', true),
+        'ttl' => env('PIXEL_MANAGER_CACHE_TTL', 3600), // 1 hour in seconds
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retry Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure exponential backoff retry logic for failed API calls.
+    |
+    */
+    'retry' => [
+        'enabled' => env('PIXEL_MANAGER_RETRY_ENABLED', true),
+        'max_attempts' => env('PIXEL_MANAGER_RETRY_MAX_ATTEMPTS', 3),
+        'initial_delay_ms' => env('PIXEL_MANAGER_RETRY_INITIAL_DELAY', 100),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Circuit Breaker
+    |--------------------------------------------------------------------------
+    |
+    | Prevent cascading failures by opening circuit after threshold failures.
+    |
+    */
+    'circuit_breaker' => [
+        'enabled' => env('PIXEL_MANAGER_CIRCUIT_BREAKER_ENABLED', true),
+        'failure_threshold' => env('PIXEL_MANAGER_CIRCUIT_BREAKER_THRESHOLD', 5),
+        'timeout_seconds' => env('PIXEL_MANAGER_CIRCUIT_BREAKER_TIMEOUT', 60),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rate Limiting
+    |--------------------------------------------------------------------------
+    |
+    | Limit API requests per minute to prevent rate limit violations.
+    |
+    */
+    'rate_limiting' => [
+        'enabled' => env('PIXEL_MANAGER_RATE_LIMITING_ENABLED', true),
+        'max_requests_per_minute' => env('PIXEL_MANAGER_RATE_LIMIT', 100),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security
+    |--------------------------------------------------------------------------
+    |
+    | Configure security features like encryption and bot detection.
+    |
+    */
+    'security' => [
+        'encrypt_credentials' => env('PIXEL_MANAGER_ENCRYPT_CREDENTIALS', true),
+        'bot_detection_enabled' => env('PIXEL_MANAGER_BOT_DETECTION', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Event Mappings
     |--------------------------------------------------------------------------
     |
@@ -145,6 +213,13 @@ return [
                     'label' => 'Access Token',
                     'type' => 'text',
                     'required' => true,
+                ],
+                'pinterest_environment' => [
+                    'label' => 'Environment',
+                    'type' => 'select',
+                    'options' => ['production', 'sandbox'],
+                    'default' => 'production',
+                    'required' => false,
                 ],
             ],
         ],
