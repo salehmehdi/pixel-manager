@@ -358,6 +358,7 @@ tail -f storage/logs/laravel.log | grep "Brevo\|Meta\|Google"
 
 - **[⚡ Quick Start](QUICK-START.md)** - Get started in 5 minutes without database
 - **[🔑 APP_ID Guide](APP-ID-GUIDE.md)** - Understand application ID configuration
+- **[🧪 Testing Guide](TESTING.md)** - Comprehensive testing documentation
 
 ## Extensibility
 
