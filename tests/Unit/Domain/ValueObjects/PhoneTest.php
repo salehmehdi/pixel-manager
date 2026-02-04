@@ -70,7 +70,7 @@ final class PhoneTest extends TestCase
 
     public function test_accepts_valid_azerbaijani_phone(): void
     {
-        $phone = Phone::fromFullNumber('+994501234567');
+        $phone = Phone::fromParts('501234567', '+994');
 
         $this->assertEquals('+994', $phone->countryCode);
         $this->assertEquals('501234567', $phone->number);
@@ -90,20 +90,21 @@ final class PhoneTest extends TestCase
         $this->assertEquals('+12345678900', $phone->toString());
     }
 
-    public function test_extracts_country_code_from_full_number(): void
+    public function test_can_create_from_us_number(): void
     {
-        $phone = Phone::fromFullNumber('+905551234567');
+        $phone = Phone::fromParts('5551234567', '+1');
 
-        $this->assertEquals('+90', $phone->countryCode);
-        $this->assertEquals('5551234567', $phone->number);
-    }
-
-    public function test_handles_formatted_phone_numbers(): void
-    {
-        $phone = Phone::fromFullNumber('+1 (555) 123-4567');
-
-        // Should extract digits only
         $this->assertEquals('+1', $phone->countryCode);
         $this->assertEquals('5551234567', $phone->number);
+        $this->assertEquals('+15551234567', $phone->fullNumber());
+    }
+
+    public function test_removes_formatting_from_phone_number(): void
+    {
+        $phone = Phone::fromParts('(555) 123-4567', '+1');
+
+        // Should extract only digits
+        $this->assertEquals('5551234567', $phone->number);
+        $this->assertEquals('+15551234567', $phone->fullNumber());
     }
 }

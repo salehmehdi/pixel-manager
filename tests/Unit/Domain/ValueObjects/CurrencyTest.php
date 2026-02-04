@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MehdiyevSignal\PixelManager\Tests\Unit\Domain\ValueObjects;
 
+use MehdiyevSignal\PixelManager\Domain\Exceptions\InvalidCurrencyException;
 use MehdiyevSignal\PixelManager\Domain\ValueObjects\Currency;
 use MehdiyevSignal\PixelManager\Tests\TestCase;
 
@@ -27,16 +28,16 @@ final class CurrencyTest extends TestCase
 
     public function test_can_create_from_string(): void
     {
-        $currency = Currency::from('USD');
+        $currency = Currency::fromString('USD');
 
         $this->assertEquals(Currency::USD, $currency);
     }
 
     public function test_throws_exception_for_invalid_currency(): void
     {
-        $this->expectException(\ValueError::class);
+        $this->expectException(InvalidCurrencyException::class);
 
-        Currency::from('INVALID');
+        Currency::fromString('INVALID');
     }
 
     public function test_try_from_returns_null_for_invalid(): void
@@ -46,14 +47,14 @@ final class CurrencyTest extends TestCase
         $this->assertNull($currency);
     }
 
-    public function test_can_get_all_values(): void
+    public function test_can_get_all_cases(): void
     {
-        $values = Currency::values();
+        $cases = Currency::cases();
 
-        $this->assertIsArray($values);
-        $this->assertContains('USD', $values);
-        $this->assertContains('EUR', $values);
-        $this->assertContains('AZN', $values);
+        $this->assertIsArray($cases);
+        $this->assertContains(Currency::USD, $cases);
+        $this->assertContains(Currency::EUR, $cases);
+        $this->assertContains(Currency::AZN, $cases);
     }
 
     public function test_azn_currency_exists(): void
@@ -63,5 +64,12 @@ final class CurrencyTest extends TestCase
 
         $this->assertEquals('AZN', $azn->value);
         $this->assertEquals('₼', $azn->symbol());
+    }
+
+    public function test_normalizes_case_when_creating_from_string(): void
+    {
+        $currency = Currency::fromString('usd');
+
+        $this->assertEquals(Currency::USD, $currency);
     }
 }
