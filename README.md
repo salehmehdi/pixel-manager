@@ -32,21 +32,36 @@ A powerful, production-ready Laravel package for tracking and distributing custo
 
 ## Requirements
 
+### Core Requirements
 - PHP 8.2 or higher
 - Laravel 11.0 or higher
 - Queue driver (Redis, Database, etc.)
-- Database (optional): MongoDB **OR** SQL (MySQL/PostgreSQL/SQLite)
 
-**Note:** Database is optional! You can store credentials in `.env` for quick setup.
+### Optional Dependencies (Based on Your Setup)
+
+**Choose ONE credential storage method:**
+- **ENV Mode** (Simplest): No extra dependencies needed ✅
+- **SQL Mode**: Uses Laravel's built-in database (MySQL/PostgreSQL/SQLite) ✅
+- **MongoDB Mode**: Requires `composer require mongodb/laravel-mongodb`
+
+**Platform-Specific (Install only what you use):**
+- **Meta/Facebook Pixel**: Requires `composer require facebook/php-business-sdk`
+- **Other platforms** (Google, TikTok, etc.): Work out of the box with Guzzle HTTP client ✅
+
+**Note:** Start with ENV mode for quick setup, upgrade to database mode when needed!
 
 ## Installation
 
-### ⚡ Quick Start (5 minutes)
+### ⚡ Quick Start (5 minutes - ENV Mode)
 
 For simple setups without database configuration:
 
 ```bash
+# Install core package
 composer require mehdiyev-signal/pixel-manager
+
+# Optional: Install Meta SDK if using Facebook/Meta Pixel
+composer require facebook/php-business-sdk
 ```
 
 Add credentials to `.env`:
@@ -57,6 +72,29 @@ PIXEL_META_ACCESS_TOKEN=your_token
 ```
 
 **Done!** See **[QUICK-START.md](QUICK-START.md)** for details.
+
+### 🗄️ MongoDB Mode Installation
+
+```bash
+# Install core package
+composer require mehdiyev-signal/pixel-manager
+
+# Install MongoDB driver
+composer require mongodb/laravel-mongodb
+
+# Optional: Meta SDK
+composer require facebook/php-business-sdk
+```
+
+### 💾 SQL Mode Installation
+
+```bash
+# Install core package (SQL support built-in with Laravel)
+composer require mehdiyev-signal/pixel-manager
+
+# Optional: Meta SDK
+composer require facebook/php-business-sdk
+```
 
 ### 📚 Full Installation
 
