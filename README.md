@@ -371,11 +371,11 @@ The DDD architecture makes it easy to extend and override without modifying core
 
 ## Security
 
-If you discover any security-related issues, please email security@saleh-signal.com instead of using the issue tracker.
+If you discover any security-related issues, please email s.mehdiyev1997@gmail.com instead of using the issue tracker.
 
 ## Credits
 
-- [Saleh Signal](https://github.com/saleh-signal)
+- [Saleh Mehdiyev](https://github.com/salehmehdi)
 - [All Contributors](../../contributors)
 
 ## License
@@ -388,4 +388,4 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Support
 
-For support, please open an issue on GitHub or contact support@saleh-signal.com.
+For support, please open an issue on [GitHub Issues](https://github.com/mehdiyev-signal/pixel-manager/issues) or contact s.mehdiyev1997@gmail.com.
