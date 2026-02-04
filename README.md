@@ -337,12 +337,13 @@ tail -f storage/logs/laravel.log | grep "Brevo\|Meta\|Google"
 
 ## Extensibility
 
-Want to add a new platform or event? The package is fully extensible!
+Want to add a new platform, customize behavior, or override components? The package is fully extensible!
 
 - **[Extensibility Guide](EXTENSIBILITY.md)** - How to add new platforms, events, and decorators
+- **[Override Guide](OVERRIDE.md)** - How to customize and override package behavior
 - **[SQL Setup Guide](SQL-SETUP.md)** - How to use SQL instead of MongoDB
 
-The DDD architecture makes it easy to extend without modifying core code.
+The DDD architecture makes it easy to extend and override without modifying core code.
 
 ## Security
 
