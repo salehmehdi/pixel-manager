@@ -1,0 +1,54 @@
+{
+    "name": "saleh-signal/pixel-manager",
+    "description": "Multi-platform pixel event tracking and distribution for Laravel",
+    "keywords": ["laravel", "pixel", "tracking", "meta", "google", "brevo", "tiktok", "pinterest", "snapchat"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Saleh Signal",
+            "email": "info@saleh-signal.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0",
+        "illuminate/database": "^11.0",
+        "illuminate/queue": "^11.0",
+        "illuminate/events": "^11.0",
+        "mongodb/laravel-mongodb": "^4.0|^5.0",
+        "facebook/php-business-sdk": "^9.0|^10.0|^11.0",
+        "guzzlehttp/guzzle": "^7.9"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0",
+        "phpunit/phpunit": "^11.0",
+        "mockery/mockery": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "SalehSignal\\PixelManager\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SalehSignal\\PixelManager\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SalehSignal\\PixelManager\\PixelManagerServiceProvider"
+            ],
+            "aliases": {
+                "PixelManager": "SalehSignal\\PixelManager\\Facades\\PixelManager"
+            }
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
