@@ -1,13 +1,13 @@
 {
-    "name": "saleh-signal/pixel-manager",
-    "description": "Multi-platform pixel event tracking and distribution for Laravel",
-    "keywords": ["laravel", "pixel", "tracking", "meta", "google", "brevo", "tiktok", "pinterest", "snapchat"],
+    "name": "mehdiyev-signal/pixel-manager",
+    "description": "Multi-platform pixel event tracking and distribution for Laravel with DDD architecture",
+    "keywords": ["laravel", "pixel", "tracking", "meta", "google", "brevo", "tiktok", "pinterest", "snapchat", "ddd", "domain-driven-design"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Saleh Signal",
-            "email": "info@saleh-signal.com"
+            "name": "Mehdiyev Signal",
+            "email": "info@mehdiyev-signal.com"
         }
     ],
     "require": {
@@ -27,21 +27,21 @@
     },
     "autoload": {
         "psr-4": {
-            "SalehSignal\\PixelManager\\": "src/"
+            "MehdiyevSignal\\PixelManager\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SalehSignal\\PixelManager\\Tests\\": "tests/"
+            "MehdiyevSignal\\PixelManager\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "SalehSignal\\PixelManager\\PixelManagerServiceProvider"
+                "MehdiyevSignal\\PixelManager\\Presentation\\Providers\\PixelManagerServiceProvider"
             ],
             "aliases": {
-                "PixelManager": "SalehSignal\\PixelManager\\Facades\\PixelManager"
+                "PixelManager": "MehdiyevSignal\\PixelManager\\Presentation\\Facades\\PixelManager"
             }
         }
     },
