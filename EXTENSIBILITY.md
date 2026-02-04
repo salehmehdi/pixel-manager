@@ -1,22 +1,24 @@
-# 🔧 Extensibility Guide - Paket Genişletme Rehberi
+# 🔧 Extensibility Guide
 
-Bu dokümantasyon, Pixel Manager paketini nasıl genişletebileceğinizi gösterir.
+This guide shows you how to extend Pixel Manager to add new platforms, events, and features.
 
-## 📋 İçindekiler
+## 📋 Table of Contents
 
-1. [Yeni Platform Ekleme](#yeni-platform-ekleme)
-2. [Yeni Event Ekleme](#yeni-event-ekleme)
-3. [SQL Desteği Ekleme](#sql-desteği-ekleme)
-4. [Custom Repository Ekleme](#custom-repository-ekleme)
-5. [Decorator Ekleme](#decorator-ekleme)
+1. [Adding New Platforms](#adding-new-platforms)
+2. [Adding New Events](#adding-new-events)
+3. [Adding SQL Support](#adding-sql-support)
+4. [Custom Repositories](#custom-repositories)
+5. [Custom Decorators](#custom-decorators)
 
 ---
 
-## 🚀 Yeni Platform Ekleme
+## 🚀 Adding New Platforms
 
-### Adım 1: PlatformType Enum'ına Ekleyin
+Let's add LinkedIn Insight Tag as an example. This process takes approximately 1-2 hours.
 
-**Dosya:** `src/Domain/ValueObjects/PlatformType.php`
+### Step 1: Add to PlatformType Enum
+
+**File:** `src/Domain/ValueObjects/PlatformType.php`
 
 ```php
 enum PlatformType: string
@@ -28,8 +30,8 @@ enum PlatformType: string
     case SNAPCHAT = 'snapchat';
     case BREVO = 'brevo';
 
-    // YENİ PLATFORM
-    case LINKEDIN = 'linkedin';  // 👈 Yeni platform ekleyin
+    // NEW PLATFORM
+    case LINKEDIN = 'linkedin';  // 👈 Add your platform
 
     public function displayName(): string
     {
@@ -46,9 +48,9 @@ enum PlatformType: string
 }
 ```
 
-### Adım 2: Platform Credentials Oluşturun
+### Step 2: Create Platform Credentials
 
-**Dosya:** `src/Domain/ValueObjects/PixelCredentials/LinkedInCredentials.php`
+**File:** `src/Domain/ValueObjects/PixelCredentials/LinkedInCredentials.php`
 
 ```php
 <?php
@@ -95,9 +97,9 @@ final readonly class LinkedInCredentials implements PlatformCredentialsInterface
 }
 ```
 
-### Adım 3: Platform Adapter Oluşturun
+### Step 3: Create Platform Adapter
 
-**Dosya:** `src/Infrastructure/Http/PlatformAdapters/LinkedInPlatformAdapter.php`
+**File:** `src/Infrastructure/Http/PlatformAdapters/LinkedInPlatformAdapter.php`
 
 ```php
 <?php
@@ -191,9 +193,9 @@ final class LinkedInPlatformAdapter extends AbstractHttpPlatformAdapter
 }
 ```
 
-### Adım 4: ApplicationCredentials'a Ekleyin
+### Step 4: Add to ApplicationCredentials
 
-**Dosya:** `src/Domain/Entities/ApplicationCredentials.php`
+**File:** `src/Domain/Entities/ApplicationCredentials.php`
 
 ```php
 public function getCredentialsFor(PlatformType $platform): ?PlatformCredentialsInterface
@@ -205,14 +207,14 @@ public function getCredentialsFor(PlatformType $platform): ?PlatformCredentialsI
         PlatformType::PINTEREST => PinterestCredentials::fromArray($this->data),
         PlatformType::SNAPCHAT => SnapchatCredentials::fromArray($this->data),
         PlatformType::BREVO => BrevoCredentials::fromArray($this->data),
-        PlatformType::LINKEDIN => LinkedInCredentials::fromArray($this->data), // 👈 YENİ
+        PlatformType::LINKEDIN => LinkedInCredentials::fromArray($this->data), // 👈 NEW
     };
 }
 ```
 
-### Adım 5: Factory'ye Kaydedin
+### Step 5: Register in Factory
 
-**Dosya:** `src/Infrastructure/Http/PlatformAdapters/Factories/PlatformAdapterFactory.php`
+**File:** `src/Infrastructure/Http/PlatformAdapters/Factories/PlatformAdapterFactory.php`
 
 ```php
 private function createPlatformAdapter(PlatformType $platform): PlatformAdapterInterface
@@ -224,16 +226,16 @@ private function createPlatformAdapter(PlatformType $platform): PlatformAdapterI
         PlatformType::PINTEREST => new PinterestPlatformAdapter($this->http),
         PlatformType::SNAPCHAT => new SnapchatPlatformAdapter($this->http),
         PlatformType::BREVO => new BrevoPlatformAdapter($this->http),
-        PlatformType::LINKEDIN => new LinkedInPlatformAdapter($this->http), // 👈 YENİ
+        PlatformType::LINKEDIN => new LinkedInPlatformAdapter($this->http), // 👈 NEW
     };
 
     return $this->applyDecorators($baseAdapter);
 }
 ```
 
-### Adım 6: Config'e Ekleyin
+### Step 6: Add to Config
 
-**Dosya:** `config/pixel-manager.php`
+**File:** `config/pixel-manager.php`
 
 ```php
 'event_mappings' => [
@@ -269,9 +271,9 @@ private function createPlatformAdapter(PlatformType $platform): PlatformAdapterI
 ],
 ```
 
-### Adım 7: Facade'e Ekleyin
+### Step 7: Add to Facade
 
-**Dosya:** `src/Presentation/Facades/PixelManagerFacadeImpl.php`
+**File:** `src/Presentation/Facades/PixelManagerFacadeImpl.php`
 
 ```php
 public function platforms(): array
@@ -283,18 +285,20 @@ public function platforms(): array
         'pinterest',
         'snapchat',
         'brevo',
-        'linkedin',  // 👈 YENİ
+        'linkedin',  // 👈 NEW
     ];
 }
 ```
 
 ---
 
-## 📅 Yeni Event Ekleme
+## 📅 Adding New Events
 
-### Adım 1: EventType Enum'ına Ekleyin
+Adding a new event type takes approximately 30 minutes.
 
-**Dosya:** `src/Domain/ValueObjects/EventType.php`
+### Step 1: Add to EventType Enum
+
+**File:** `src/Domain/ValueObjects/EventType.php`
 
 ```php
 enum EventType: string
@@ -303,16 +307,16 @@ enum EventType: string
     case SUBSCRIPTION = 'subscription';
     case ADD_TO_CART = 'add_to_cart';
     case PURCHASE = 'purchase';
-    // ... diğer eventler
+    // ... other events
 
-    // YENİ EVENT
-    case CONTACT_FORM = 'contact_form';  // 👈 Yeni event ekleyin
+    // NEW EVENT
+    case CONTACT_FORM = 'contact_form';  // 👈 Add your event
 }
 ```
 
-### Adım 2: Platform Adapter'lara Ekleyin
+### Step 2: Update Platform Adapters
 
-Her platform adapter'ında `supports()` ve `mapEventName()` metodlarını güncelleyin:
+Update `supports()` and `mapEventName()` in each relevant platform adapter:
 
 ```php
 public function supports(EventType $eventType): bool
@@ -321,7 +325,7 @@ public function supports(EventType $eventType): bool
         EventType::PURCHASE,
         EventType::ADD_TO_CART,
         // ...
-        EventType::CONTACT_FORM,  // 👈 Yeni event
+        EventType::CONTACT_FORM,  // 👈 New event
     ]);
 }
 
@@ -337,311 +341,135 @@ public function mapEventName(EventType $type): ?string
 }
 ```
 
-### Adım 3: Config'e Ekleyin
+### Step 3: Add to Config
 
 ```php
 'event_mappings' => [
-    'contact_form' => ['meta', 'google', 'brevo'],  // 👈 Yeni event mapping
+    'contact_form' => ['meta', 'google', 'brevo'],  // 👈 New event mapping
     // ...
 ],
 ```
 
 ---
 
-## 🗄️ SQL Desteği Ekleme
+## 🗄️ Adding SQL Support
 
-### MySQL/PostgreSQL Repository Implementasyonu
+SQL support is already built-in! Just configure and migrate.
 
-**Dosya:** `src/Infrastructure/Persistence/SQL/SQLCredentialsRepository.php`
+### Using MySQL/PostgreSQL/SQLite
+
+**1. Configure `.env`:**
+
+```env
+# Choose SQL driver
+PIXEL_MANAGER_DRIVER=sql
+
+# SQL connection (mysql, pgsql, sqlite)
+PIXEL_MANAGER_SQL_CONNECTION=mysql
+```
+
+**2. Copy migration:**
+
+```bash
+cp src/Infrastructure/Persistence/SQL/Migrations/create_pixel_manager_tables.php \
+   database/migrations/2026_02_04_000001_create_pixel_manager_tables.php
+```
+
+**3. Run migration:**
+
+```bash
+php artisan migrate
+```
+
+See [SQL-SETUP.md](SQL-SETUP.md) for detailed instructions.
+
+---
+
+## 🗃️ Custom Repositories
+
+You can create custom repository implementations for any storage backend.
+
+### Example: Redis Repository
+
+**File:** `src/Infrastructure/Persistence/Redis/RedisCredentialsRepository.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace MehdiyevSignal\PixelManager\Infrastructure\Persistence\SQL;
+namespace MehdiyevSignal\PixelManager\Infrastructure\Persistence\Redis;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use MehdiyevSignal\PixelManager\Domain\Entities\ApplicationCredentials;
 use MehdiyevSignal\PixelManager\Domain\Repositories\CredentialsRepositoryInterface;
 use MehdiyevSignal\PixelManager\Domain\ValueObjects\PlatformCredentialsInterface;
 use MehdiyevSignal\PixelManager\Domain\ValueObjects\PlatformType;
 
-final class SQLCredentialsRepository implements CredentialsRepositoryInterface
+final class RedisCredentialsRepository implements CredentialsRepositoryInterface
 {
-    public function __construct(
-        private readonly string $tableName = 'pixel_manager_credentials'
-    ) {
-    }
+    private const KEY_PREFIX = 'pixel_manager:credentials:';
+    private const TTL = 3600; // 1 hour
 
     public function findByApplicationId(int $appId): ?ApplicationCredentials
     {
-        $record = DB::table($this->tableName)
-            ->where('app_id', $appId)
-            ->where('category', 'customer_event')
-            ->first();
+        $key = self::KEY_PREFIX . $appId;
+        $data = Redis::get($key);
 
-        if (!$record) {
+        if (!$data) {
             return null;
         }
 
+        $decoded = json_decode($data, true);
+
         return new ApplicationCredentials(
-            appId: $record->app_id,
-            category: $record->category,
-            data: json_decode($record->data, true)
+            appId: $decoded['app_id'],
+            category: $decoded['category'],
+            data: $decoded['data']
         );
-    }
-
-    public function findPlatformCredentials(
-        int $appId,
-        PlatformType $platform
-    ): ?PlatformCredentialsInterface {
-        $credentials = $this->findByApplicationId($appId);
-
-        return $credentials?->getCredentialsFor($platform);
     }
 
     public function save(ApplicationCredentials $credentials): void
     {
-        DB::table($this->tableName)->updateOrInsert(
-            [
-                'app_id' => $credentials->getAppId(),
-                'category' => $credentials->getCategory(),
-            ],
-            [
-                'data' => json_encode($credentials->getData()),
-                'updated_at' => now(),
-            ]
-        );
+        $key = self::KEY_PREFIX . $credentials->getAppId();
+        $data = json_encode([
+            'app_id' => $credentials->getAppId(),
+            'category' => $credentials->getCategory(),
+            'data' => $credentials->getData(),
+        ]);
+
+        Redis::setex($key, self::TTL, $data);
     }
 
-    public function delete(int $appId): void
-    {
-        DB::table($this->tableName)
-            ->where('app_id', $appId)
-            ->delete();
-    }
+    // ... implement other methods
 }
 ```
 
-**Dosya:** `src/Infrastructure/Persistence/SQL/SQLEventLogRepository.php`
+**Register in ServiceProvider:**
+
+```php
+$this->app->bind(
+    CredentialsRepositoryInterface::class,
+    RedisCredentialsRepository::class
+);
+```
+
+---
+
+## 🎨 Custom Decorators
+
+Add your own cross-cutting concerns using the Decorator pattern.
+
+### Example: Metrics Decorator
+
+**File:** `src/Infrastructure/Http/PlatformAdapters/Decorators/MetricsPlatformAdapter.php`
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace MehdiyevSignal\PixelManager\Infrastructure\Persistence\SQL;
-
-use Illuminate\Support\Facades\DB;
-use MehdiyevSignal\PixelManager\Domain\Entities\PixelEvent;
-use MehdiyevSignal\PixelManager\Domain\Repositories\EventLogRepositoryInterface;
-use MehdiyevSignal\PixelManager\Domain\ValueObjects\EventId;
-use MehdiyevSignal\PixelManager\Domain\ValueObjects\PlatformType;
-
-final class SQLEventLogRepository implements EventLogRepositoryInterface
-{
-    public function __construct(
-        private readonly string $tableName = 'pixel_manager_events'
-    ) {
-    }
-
-    public function log(PixelEvent $event, array $destinations): void
-    {
-        DB::table($this->tableName)->insert([
-            'event_id' => $event->getId()->toString(),
-            'event_type' => $event->getType()->value,
-            'event_name' => $event->getEventName(),
-            'value' => $event->getValue(),
-            'currency' => $event->getCurrency()?->value,
-            'customer_email' => $event->getCustomer()?->email?->value(),
-            'customer_phone' => $event->getCustomer()?->phone?->value(),
-            'destinations' => json_encode(array_map(fn($p) => $p->value, $destinations)),
-            'event_data' => json_encode($event->toArray()),
-            'created_at' => $event->getEventTime(),
-        ]);
-    }
-
-    public function findById(EventId $id): ?PixelEvent
-    {
-        $record = DB::table($this->tableName)
-            ->where('event_id', $id->toString())
-            ->first();
-
-        if (!$record) {
-            return null;
-        }
-
-        // Reconstruct PixelEvent from record
-        // Implementation depends on your needs
-        return null;
-    }
-
-    public function findByEventType(string $eventType, int $limit = 100): array
-    {
-        $records = DB::table($this->tableName)
-            ->where('event_type', $eventType)
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
-
-        // Map to PixelEvent entities
-        return [];
-    }
-
-    public function countByDateRange(
-        \DateTimeImmutable $from,
-        \DateTimeImmutable $to
-    ): int {
-        return DB::table($this->tableName)
-            ->whereBetween('created_at', [$from, $to])
-            ->count();
-    }
-}
-```
-
-### SQL Migration
-
-**Dosya:** `database/migrations/2026_02_04_000001_create_pixel_manager_tables.php`
-
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        // Credentials table
-        Schema::create('pixel_manager_credentials', function (Blueprint $table) {
-            $table->id();
-            $table->integer('app_id')->unique();
-            $table->string('category', 50)->default('customer_event');
-            $table->json('data');
-            $table->timestamps();
-
-            $table->index('app_id');
-        });
-
-        // Events log table
-        Schema::create('pixel_manager_events', function (Blueprint $table) {
-            $table->id();
-            $table->string('event_id', 100)->unique();
-            $table->string('event_type', 50);
-            $table->string('event_name', 100);
-            $table->decimal('value', 10, 2)->nullable();
-            $table->string('currency', 3)->nullable();
-            $table->string('customer_email', 255)->nullable();
-            $table->string('customer_phone', 50)->nullable();
-            $table->json('destinations');
-            $table->json('event_data');
-            $table->timestamp('created_at');
-
-            $table->index('event_type');
-            $table->index('created_at');
-            $table->index('event_id');
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('pixel_manager_events');
-        Schema::dropIfExists('pixel_manager_credentials');
-    }
-};
-```
-
-### SQL Config
-
-**Dosya:** `config/pixel-manager.php`
-
-```php
-return [
-    // Database driver: 'mongodb' or 'sql'
-    'driver' => env('PIXEL_MANAGER_DRIVER', 'mongodb'),
-
-    // SQL configuration (when driver is 'sql')
-    'sql' => [
-        'connection' => env('PIXEL_MANAGER_SQL_CONNECTION', 'mysql'),
-        'credentials_table' => 'pixel_manager_credentials',
-        'events_table' => 'pixel_manager_events',
-    ],
-
-    // MongoDB configuration (when driver is 'mongodb')
-    'mongodb' => [
-        'connection' => env('PIXEL_MANAGER_DB_CONNECTION', 'mongodb'),
-        'applications_collection' => 'applications',
-        'events_collection' => env('PIXEL_MANAGER_COLLECTION', 'mp_customer_event'),
-    ],
-
-    // ...
-];
-```
-
-### ServiceProvider'da SQL Binding
-
-**Dosya:** `src/Presentation/Providers/PixelManagerServiceProvider.php`
-
-```php
-private function registerRepositories(): void
-{
-    $driver = config('pixel-manager.driver', 'mongodb');
-
-    if ($driver === 'sql') {
-        // SQL repositories
-        $this->app->singleton(
-            CredentialsRepositoryInterface::class,
-            fn() => new SQLCredentialsRepository(
-                config('pixel-manager.sql.credentials_table')
-            )
-        );
-
-        $this->app->singleton(
-            EventLogRepositoryInterface::class,
-            fn() => new SQLEventLogRepository(
-                config('pixel-manager.sql.events_table')
-            )
-        );
-    } else {
-        // MongoDB repositories (default)
-        $this->app->singleton(
-            CredentialsRepositoryInterface::class,
-            MongoDBCredentialsRepository::class
-        );
-
-        $this->app->singleton(
-            EventLogRepositoryInterface::class,
-            MongoDBEventLogRepository::class
-        );
-    }
-
-    // Wrap with caching decorator
-    if (config('pixel-manager.cache.enabled', true)) {
-        $this->app->extend(
-            CredentialsRepositoryInterface::class,
-            fn($repo, $app) => new CachedCredentialsRepository(
-                $repo,
-                $app->make('cache.store'),
-                config('pixel-manager.cache.ttl', 3600)
-            )
-        );
-    }
-}
-```
-
----
-
-## 🎨 Custom Decorator Ekleme
-
-Kendi decorator'ınızı ekleyebilirsiniz (örneğin, metrics toplama):
-
-```php
-<?php
-
-namespace YourApp\PixelManager\Decorators;
+namespace MehdiyevSignal\PixelManager\Infrastructure\Http\PlatformAdapters\Decorators;
 
 use MehdiyevSignal\PixelManager\Domain\Entities\PixelEvent;
 use MehdiyevSignal\PixelManager\Domain\Services\PlatformAdapterInterface;
@@ -658,12 +486,15 @@ final class MetricsPlatformAdapter implements PlatformAdapterInterface
     ) {
     }
 
-    public function sendEvent(PixelEvent $event, PlatformCredentialsInterface $credentials): PlatformResponse
-    {
+    public function sendEvent(
+        PixelEvent $event,
+        PlatformCredentialsInterface $credentials
+    ): PlatformResponse {
         $startTime = microtime(true);
         $response = $this->inner->sendEvent($event, $credentials);
         $duration = (microtime(true) - $startTime) * 1000;
 
+        // Collect metrics
         $this->metrics->record([
             'platform' => $this->getPlatformType()->value,
             'event_type' => $event->getType()->value,
@@ -692,22 +523,33 @@ final class MetricsPlatformAdapter implements PlatformAdapterInterface
 }
 ```
 
-ServiceProvider'da kaydedin:
+**Register in PlatformAdapterFactory:**
 
 ```php
 private function applyDecorators(PlatformAdapterInterface $adapter): PlatformAdapterInterface
 {
     // Custom decorator
     if (config('app.metrics_enabled')) {
-        $adapter = new MetricsPlatformAdapter($adapter, app(MetricsCollector::class));
+        $adapter = new MetricsPlatformAdapter(
+            $adapter,
+            app(MetricsCollector::class)
+        );
     }
 
-    // Existing decorators
+    // Built-in decorators
     if (config('pixel-manager.logging', true)) {
         $adapter = new LoggingPlatformAdapter($adapter, Log::channel());
     }
 
-    // ...
+    if (config('pixel-manager.rate_limiting.enabled', true)) {
+        $adapter = new RateLimitingPlatformAdapter(
+            $adapter,
+            app(CacheRepository::class),
+            config('pixel-manager.rate_limiting.max_requests_per_minute', 100)
+        );
+    }
+
+    // ... other decorators
 
     return $adapter;
 }
@@ -715,40 +557,92 @@ private function applyDecorators(PlatformAdapterInterface $adapter): PlatformAda
 
 ---
 
-## 📦 Package Olarak Yayınlama
+## 📦 Publishing as Separate Package
 
-Kendi platform veya decorator'ınızı ayrı bir package olarak yayınlayabilirsiniz:
+You can publish your platform adapter as a separate package:
+
+### Example: composer.json
 
 ```json
 {
     "name": "your-vendor/pixel-manager-linkedin",
     "description": "LinkedIn Insight Tag adapter for Pixel Manager",
+    "type": "library",
+    "license": "MIT",
     "require": {
+        "php": "^8.2",
         "mehdiyev-signal/pixel-manager": "^2.0"
     },
     "autoload": {
         "psr-4": {
             "YourVendor\\PixelManagerLinkedIn\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "YourVendor\\PixelManagerLinkedIn\\LinkedInServiceProvider"
+            ]
+        }
+    }
+}
+```
+
+### Service Provider
+
+```php
+<?php
+
+namespace YourVendor\PixelManagerLinkedIn;
+
+use Illuminate\Support\ServiceProvider;
+use MehdiyevSignal\PixelManager\Domain\ValueObjects\PlatformType;
+
+class LinkedInServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        // Register your platform adapter
+        $this->app->extend(
+            PlatformAdapterFactory::class,
+            function ($factory) {
+                $factory->register(
+                    PlatformType::LINKEDIN,
+                    LinkedInPlatformAdapter::class
+                );
+                return $factory;
+            }
+        );
     }
 }
 ```
 
 ---
 
-## 🎯 Özet
+## 🎯 Summary
 
-### ✅ Kolay Genişletilebilir
-- ✅ Yeni platform ekleme: 7 dosya (1-2 saat)
-- ✅ Yeni event ekleme: 3 dosya (30 dakika)
-- ✅ SQL desteği: Repository değiştirme (2 saat)
-- ✅ Custom decorator: 1 dosya (1 saat)
+### ✅ Easy to Extend
 
-### 📚 Daha Fazla Bilgi
-- [README.md](README.md) - Genel kullanım
-- [UPGRADE-2.0.md](UPGRADE-2.0.md) - Migration rehberi
-- [README-V2-ADDENDUM.md](README-V2-ADDENDUM.md) - v2.0 özellikleri
+- ✅ **Add new platform:** 7 files (1-2 hours)
+- ✅ **Add new event:** 3 files (30 minutes)
+- ✅ **Add SQL support:** Built-in, just configure
+- ✅ **Custom decorator:** 1 file (1 hour)
+- ✅ **Custom repository:** 1 file (2 hours)
+
+### 🏗️ DDD Benefits
+
+- **Interface-based:** Everything follows contracts
+- **Modular:** Add features without touching core
+- **Testable:** Mock any component
+- **Maintainable:** Clear separation of concerns
+
+### 📚 More Information
+
+- [README.md](README.md) - General usage
+- [UPGRADE-2.0.md](UPGRADE-2.0.md) - Migration guide
+- [README-V2-ADDENDUM.md](README-V2-ADDENDUM.md) - v2.0 features
+- [SQL-SETUP.md](SQL-SETUP.md) - SQL database setup
 
 ---
 
-**DDD mimarisi sayesinde her şey modüler ve genişletilebilir!** 🎉
+**Thanks to DDD architecture, everything is modular and extensible!** 🎉

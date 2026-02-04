@@ -1,41 +1,42 @@
 # 🗄️ SQL Database Setup Guide
 
-Pixel Manager v2.0 artık **MongoDB** ve **SQL** (MySQL, PostgreSQL, SQLite) veritabanlarını destekliyor!
+Pixel Manager v2.0 now supports **MongoDB** and **SQL** databases (MySQL, PostgreSQL, SQLite)!
 
-## 📋 Hızlı Başlangıç
+## 📋 Quick Start
 
-### 1. Driver Seçimi
+### 1. Choose Driver
 
-`.env` dosyanızda driver'ı seçin:
+Configure the driver in your `.env` file:
 
 ```env
-# SQL kullanmak için
+# To use SQL
 PIXEL_MANAGER_DRIVER=sql
 PIXEL_MANAGER_SQL_CONNECTION=mysql
 
-# MongoDB kullanmak için (default)
+# To use MongoDB (default)
 PIXEL_MANAGER_DRIVER=mongodb
 ```
 
-### 2. Migration'ları Çalıştırın
+### 2. Run Migrations
 
-SQL kullanıyorsanız, tabloları oluşturun:
+If using SQL, create the tables:
 
 ```bash
 php artisan migrate
 ```
 
-Migration dosyası:
+Migration file location:
 ```bash
 src/Infrastructure/Persistence/SQL/Migrations/create_pixel_manager_tables.php
 ```
 
-Laravel'in migration klasörüne kopyalayın:
+Copy to Laravel migrations folder:
 ```bash
-cp src/Infrastructure/Persistence/SQL/Migrations/create_pixel_manager_tables.php database/migrations/2026_02_04_000001_create_pixel_manager_tables.php
+cp src/Infrastructure/Persistence/SQL/Migrations/create_pixel_manager_tables.php \
+   database/migrations/2026_02_04_000001_create_pixel_manager_tables.php
 ```
 
-### 3. Veritabanı Yapılandırması
+### 3. Database Configuration
 
 #### MySQL
 
@@ -77,25 +78,25 @@ PIXEL_MANAGER_SQL_CONNECTION=sqlite
 
 ---
 
-## 📊 Tablo Yapısı
+## 📊 Table Structure
 
-### `pixel_manager_credentials` Tablosu
+### `pixel_manager_credentials` Table
 
-Platform credentials'larını saklar:
+Stores platform credentials:
 
 ```sql
 CREATE TABLE pixel_manager_credentials (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     app_id INT UNIQUE NOT NULL,
     category VARCHAR(50) DEFAULT 'customer_event',
-    data JSON NOT NULL,  -- Tüm platform credentials
+    data JSON NOT NULL,  -- All platform credentials
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     INDEX(app_id, category)
 );
 ```
 
-**Örnek data (JSON):**
+**Example data (JSON):**
 ```json
 {
     "meta_pixel_id": "123456789",
@@ -107,9 +108,9 @@ CREATE TABLE pixel_manager_credentials (
 }
 ```
 
-### `pixel_manager_events` Tablosu
+### `pixel_manager_events` Table
 
-Tüm pixel event'leri loglar:
+Logs all pixel events:
 
 ```sql
 CREATE TABLE pixel_manager_events (
@@ -127,8 +128,8 @@ CREATE TABLE pixel_manager_events (
     customer_country VARCHAR(2),
     ip_address VARCHAR(45),
     user_agent TEXT,
-    destinations JSON,  -- Hangi platformlara gönderildi
-    event_data JSON,    -- Tam event datası
+    destinations JSON,  -- Which platforms received the event
+    event_data JSON,    -- Full event data
     created_at TIMESTAMP,
     INDEX(event_type),
     INDEX(event_name),
@@ -137,7 +138,7 @@ CREATE TABLE pixel_manager_events (
 );
 ```
 
-**Örnek event kaydı:**
+**Example event record:**
 ```json
 {
     "event_id": "65f1234567890abcdef",
@@ -153,29 +154,29 @@ CREATE TABLE pixel_manager_events (
 
 ---
 
-## 🔄 MongoDB'dan SQL'e Geçiş
+## 🔄 Migrating from MongoDB to SQL
 
-### 1. Mevcut MongoDB Verilerini Export Edin
+### 1. Export Existing MongoDB Data
 
 ```bash
-# Credentials export
+# Export credentials
 mongoexport --db=your_db --collection=applications \
   --query='{"category":"customer_event"}' \
   --out=credentials.json
 
-# Events export
+# Export events
 mongoexport --db=your_db --collection=mp_customer_event \
   --out=events.json
 ```
 
-### 2. SQL'e Import Scripti
+### 2. Import to SQL Script
 
 ```php
 <?php
 
 use Illuminate\Support\Facades\DB;
 
-// Credentials import
+// Import credentials
 $credentials = json_decode(file_get_contents('credentials.json'), true);
 foreach ($credentials as $cred) {
     DB::table('pixel_manager_credentials')->insert([
@@ -187,7 +188,7 @@ foreach ($credentials as $cred) {
     ]);
 }
 
-// Events import
+// Import events
 $events = json_decode(file_get_contents('events.json'), true);
 foreach ($events as $event) {
     DB::table('pixel_manager_events')->insert([
@@ -208,30 +209,30 @@ foreach ($events as $event) {
 
 ## 📈 Analytics Queries
 
-SQL kullanmanın avantajı: Kolay analytics!
+The advantage of SQL: Easy analytics!
 
-### Event İstatistikleri
+### Event Statistics
 
 ```php
 use MehdiyevSignal\PixelManager\Infrastructure\Persistence\SQL\SQLEventLogRepository;
 
 $repo = app(SQLEventLogRepository::class);
 
-// Platform başına istatistikler
+// Stats by platform
 $stats = $repo->getStatsByPlatform(
     now()->subDays(7),
     now()
 );
 // ['meta' => 1250, 'google' => 1200, 'tiktok' => 980]
 
-// Event tipi başına
+// Stats by event type
 $eventStats = $repo->getStatsByEventType(
     now()->subDays(30),
     now()
 );
 // ['purchase' => 350, 'add_to_cart' => 1200, 'view_item' => 4500]
 
-// Gelir istatistikleri
+// Revenue statistics
 $revenue = $repo->getRevenueStats(
     now()->subDays(7),
     now()
@@ -244,7 +245,7 @@ $revenue = $repo->getRevenueStats(
 ```php
 use Illuminate\Support\Facades\DB;
 
-// En çok satan ürünler
+// Top selling products
 $topProducts = DB::table('pixel_manager_events')
     ->where('event_type', 'purchase')
     ->whereDate('created_at', '>=', now()->subDays(30))
@@ -254,7 +255,7 @@ $topProducts = DB::table('pixel_manager_events')
     ->limit(10)
     ->get();
 
-// Günlük conversion rate
+// Daily conversion rate
 $dailyStats = DB::table('pixel_manager_events')
     ->select(
         DB::raw('DATE(created_at) as date'),
@@ -266,30 +267,39 @@ $dailyStats = DB::table('pixel_manager_events')
     ->groupBy('date')
     ->orderBy('date', 'desc')
     ->get();
+
+// Revenue by country
+$revenueByCountry = DB::table('pixel_manager_events')
+    ->where('event_type', 'purchase')
+    ->whereNotNull('customer_country')
+    ->select('customer_country', DB::raw('SUM(value) as total_revenue'))
+    ->groupBy('customer_country')
+    ->orderBy('total_revenue', 'desc')
+    ->get();
 ```
 
 ---
 
 ## ⚡ Performance Tips
 
-### 1. Indexler
+### 1. Indexes
 
-Migration zaten gerekli indexleri oluşturuyor, ancak ek indexler ekleyebilirsiniz:
+The migration already creates necessary indexes, but you can add more:
 
 ```sql
--- Customer email aramaları için
+-- For customer email searches
 CREATE INDEX idx_customer_email ON pixel_manager_events(customer_email);
 
--- Tarih bazlı sorgular için
+-- For date-based queries
 CREATE INDEX idx_created_at_event_type ON pixel_manager_events(created_at, event_type);
 
--- JSON alan aramaları için (MySQL 5.7+)
+-- For JSON field searches (MySQL 5.7+)
 CREATE INDEX idx_destinations ON pixel_manager_events((CAST(destinations AS CHAR(50) ARRAY)));
 ```
 
-### 2. Partitioning (Büyük Veri İçin)
+### 2. Partitioning (For Large Datasets)
 
-MySQL'de tarih bazlı partitioning:
+Date-based partitioning in MySQL:
 
 ```sql
 ALTER TABLE pixel_manager_events
@@ -302,10 +312,21 @@ PARTITION BY RANGE (YEAR(created_at) * 100 + MONTH(created_at)) (
 );
 ```
 
-### 3. Eski Kayıtları Temizleme
+### 3. Archiving Old Records
 
 ```php
-// 90 günden eski event'leri sil
+// Delete events older than 90 days
+DB::table('pixel_manager_events')
+    ->where('created_at', '<', now()->subDays(90))
+    ->delete();
+
+// Or archive to a separate table
+DB::statement('
+    INSERT INTO pixel_manager_events_archive
+    SELECT * FROM pixel_manager_events
+    WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY)
+');
+
 DB::table('pixel_manager_events')
     ->where('created_at', '<', now()->subDays(90))
     ->delete();
@@ -315,71 +336,149 @@ DB::table('pixel_manager_events')
 
 ## 🔍 Troubleshooting
 
-### "Table doesn't exist" Hatası
+### "Table doesn't exist" Error
 
 ```bash
-# Migration'ı çalıştırdığınızdan emin olun
+# Ensure you ran the migration
 php artisan migrate
 
-# Migration dosyasını kontrol edin
+# Check migration file exists
 ls -la database/migrations/ | grep pixel_manager
 ```
 
-### JSON Alan Sorunları
+### JSON Field Issues
 
-MySQL 5.7+ kullandığınızdan emin olun:
+Ensure you're using MySQL 5.7+ or PostgreSQL 9.4+:
 
 ```sql
 SELECT VERSION();
--- 5.7.0 veya üzeri olmalı
+-- MySQL: Should be 5.7.0 or higher
+-- PostgreSQL: Should be 9.4 or higher
 ```
 
-### Performance Sorunları
+### Performance Issues
 
 ```sql
--- Query plan'ı kontrol edin
+-- Check query plan
 EXPLAIN SELECT * FROM pixel_manager_events
 WHERE event_type = 'purchase'
 AND created_at >= '2026-01-01';
 
--- Index kullanımını kontrol edin
+-- Check index usage
 SHOW INDEX FROM pixel_manager_events;
+
+-- Analyze table (MySQL)
+ANALYZE TABLE pixel_manager_events;
+
+-- Analyze table (PostgreSQL)
+ANALYZE pixel_manager_events;
+```
+
+### Connection Issues
+
+```php
+// Test database connection
+try {
+    DB::connection('mysql')->getPdo();
+    echo "Connection successful!";
+} catch (\Exception $e) {
+    echo "Connection failed: " . $e->getMessage();
+}
 ```
 
 ---
 
-## 🆚 MongoDB vs SQL Karşılaştırması
+## 🆚 MongoDB vs SQL Comparison
 
-| Özellik | MongoDB | SQL |
+| Feature | MongoDB | SQL |
 |---------|---------|-----|
-| **Setup** | Kolay | Çok Kolay |
-| **Scalability** | Mükemmel | İyi |
-| **Analytics** | İyi | Mükemmel |
-| **Join'ler** | Zor | Kolay |
-| **Flexible Schema** | Evet | Hayır |
-| **Transaction Support** | İyi | Mükemmel |
-| **Hosting Cost** | Yüksek | Düşük |
+| **Setup** | Easy | Very Easy |
+| **Scalability** | Excellent | Good |
+| **Analytics** | Good | Excellent |
+| **Joins** | Difficult | Easy |
+| **Flexible Schema** | Yes | No |
+| **Transaction Support** | Good | Excellent |
+| **Hosting Cost** | Higher | Lower |
+| **Query Language** | MongoDB Query | Standard SQL |
 
-### Ne Zaman SQL Kullanılmalı?
+### When to Use SQL?
 
-✅ Mevcut SQL veritabanınız varsa
-✅ Complex analytics sorgular yapıyorsanız
-✅ Relational data'nız varsa
-✅ MongoDB kurulum maliyetinden kaçınmak istiyorsanız
+✅ You already have an SQL database
+✅ You need complex analytics queries
+✅ You have relational data
+✅ You want to avoid MongoDB hosting costs
+✅ You need strong ACID transactions
 
-### Ne Zaman MongoDB Kullanılmalı?
+### When to Use MongoDB?
 
-✅ Çok büyük data volume'ü varsa
-✅ Horizontal scaling gerekiyorsa
-✅ Flexible schema tercih ediyorsanız
-✅ Document-based yapı daha uygunsa
+✅ Very large data volumes
+✅ Horizontal scaling required
+✅ Flexible schema preferred
+✅ Document-based structure fits better
+✅ High write throughput needed
 
 ---
 
-## 🎯 Sonuç
+## 📊 Example Analytics Dashboard
 
-SQL desteği ile Pixel Manager artık **daha esnek** ve **her ortama uyumlu**!
+### Daily Metrics Query
 
-Sorularınız için: [GitHub Issues](https://github.com/mehdiyev-signal/pixel-manager/issues)
+```php
+$metrics = DB::table('pixel_manager_events')
+    ->select([
+        DB::raw('DATE(created_at) as date'),
+        DB::raw('COUNT(DISTINCT customer_email) as unique_users'),
+        DB::raw('COUNT(*) as total_events'),
+        DB::raw('SUM(CASE WHEN event_type = "purchase" THEN 1 ELSE 0 END) as purchases'),
+        DB::raw('SUM(CASE WHEN event_type = "purchase" THEN value ELSE 0 END) as revenue'),
+    ])
+    ->whereDate('created_at', '>=', now()->subDays(30))
+    ->groupBy('date')
+    ->orderBy('date', 'desc')
+    ->get();
+```
 
-**v2.0 ile DDD architecture + SQL support = Production-ready!** 🚀
+### Platform Performance
+
+```php
+$platformPerformance = DB::table('pixel_manager_events')
+    ->select([
+        DB::raw('JSON_UNQUOTE(JSON_EXTRACT(destinations, "$[0]")) as platform'),
+        DB::raw('COUNT(*) as events_sent'),
+        DB::raw('AVG(value) as avg_value'),
+    ])
+    ->whereDate('created_at', '>=', now()->subDays(7))
+    ->groupBy('platform')
+    ->get();
+```
+
+### Conversion Funnel
+
+```php
+$funnel = DB::table('pixel_manager_events')
+    ->select([
+        DB::raw('SUM(CASE WHEN event_type = "view_item" THEN 1 ELSE 0 END) as views'),
+        DB::raw('SUM(CASE WHEN event_type = "add_to_cart" THEN 1 ELSE 0 END) as add_to_cart'),
+        DB::raw('SUM(CASE WHEN event_type = "begin_checkout" THEN 1 ELSE 0 END) as checkouts'),
+        DB::raw('SUM(CASE WHEN event_type = "purchase" THEN 1 ELSE 0 END) as purchases'),
+    ])
+    ->whereDate('created_at', '>=', now()->subDays(7))
+    ->first();
+
+// Calculate conversion rates
+$conversionRates = [
+    'view_to_cart' => ($funnel->add_to_cart / $funnel->views) * 100,
+    'cart_to_checkout' => ($funnel->checkouts / $funnel->add_to_cart) * 100,
+    'checkout_to_purchase' => ($funnel->purchases / $funnel->checkouts) * 100,
+];
+```
+
+---
+
+## 🎯 Conclusion
+
+SQL support makes Pixel Manager **more flexible** and **compatible with every environment**!
+
+For questions: [GitHub Issues](https://github.com/mehdiyev-signal/pixel-manager/issues)
+
+**v2.0 with DDD architecture + SQL support = Production-ready!** 🚀
