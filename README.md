@@ -2,6 +2,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mehdiyev-signal/pixel-manager.svg?style=flat-square)](https://packagist.org/packages/mehdiyev-signal/pixel-manager)
 [![Total Downloads](https://img.shields.io/packagist/dt/mehdiyev-signal/pixel-manager.svg?style=flat-square)](https://packagist.org/packages/mehdiyev-signal/pixel-manager)
+[![Tests](https://github.com/salehmehdi/pixel-manager/workflows/Tests/badge.svg)](https://github.com/salehmehdi/pixel-manager/actions)
+[![License](https://img.shields.io/packagist/l/mehdiyev-signal/pixel-manager.svg?style=flat-square)](LICENSE)
 
 A powerful, production-ready Laravel package for tracking and distributing customer events to multiple marketing platforms with enterprise-grade reliability and security.
 
