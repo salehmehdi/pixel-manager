@@ -44,6 +44,7 @@ enum Currency: string
     case CZK = 'CZK';
     case HUF = 'HUF';
     case ILS = 'ILS';
+    case AZN = 'AZN';
 
     /**
      * Create Currency from string, throws exception if invalid.
@@ -80,6 +81,7 @@ enum Currency: string
             self::RUB => '₽',
             self::KRW => '₩',
             self::BRL => 'R$',
+            self::AZN => '₼',
             self::AUD, self::CAD, self::NZD, self::HKD, self::SGD, self::MXN => '$',
             default => $this->value,
         };
