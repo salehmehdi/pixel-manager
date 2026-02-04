@@ -13,80 +13,83 @@ final class EmailTest extends TestCase
 {
     public function test_can_create_valid_email(): void
     {
-        $email = new Email('test@example.com');
+        $email = Email::fromString('test@example.com');
 
-        $this->assertEquals('test@example.com', $email->value());
+        $this->assertEquals('test@example.com', $email->value);
     }
 
     public function test_throws_exception_for_invalid_email(): void
     {
         $this->expectException(InvalidEmailException::class);
 
-        new Email('invalid-email');
+        Email::fromString('invalid-email');
     }
 
     public function test_throws_exception_for_empty_email(): void
     {
         $this->expectException(InvalidEmailException::class);
 
-        new Email('');
+        Email::fromString('');
+    }
+
+    public function test_normalizes_email_to_lowercase(): void
+    {
+        $email = Email::fromString('TEST@EXAMPLE.COM');
+
+        $this->assertEquals('test@example.com', $email->value);
+    }
+
+    public function test_trims_whitespace(): void
+    {
+        $email = Email::fromString('  test@example.com  ');
+
+        $this->assertEquals('test@example.com', $email->value);
     }
 
     public function test_can_hash_email_with_sha256(): void
     {
-        $email = new Email('test@example.com');
-        $hashed = $email->hashed(HashAlgorithm::SHA256);
+        $email = Email::fromString('test@example.com');
+        $hashed = $email->hash(HashAlgorithm::SHA256);
 
-        $expectedHash = hash('sha256', strtolower(trim('test@example.com')));
-
+        $expectedHash = hash('sha256', 'test@example.com');
         $this->assertEquals($expectedHash, $hashed);
     }
 
     public function test_can_hash_email_with_md5(): void
     {
-        $email = new Email('test@example.com');
-        $hashed = $email->hashed(HashAlgorithm::MD5);
+        $email = Email::fromString('test@example.com');
+        $hashed = $email->hash(HashAlgorithm::MD5);
 
-        $expectedHash = hash('md5', strtolower(trim('test@example.com')));
-
+        $expectedHash = hash('md5', 'test@example.com');
         $this->assertEquals($expectedHash, $hashed);
     }
 
-    public function test_normalizes_email_before_hashing(): void
+    public function test_hashes_normalized_email(): void
     {
-        $email1 = new Email('  TEST@EXAMPLE.COM  ');
-        $email2 = new Email('test@example.com');
+        $email1 = Email::fromString('  TEST@EXAMPLE.COM  ');
+        $email2 = Email::fromString('test@example.com');
 
-        $this->assertEquals($email2->hashed(), $email1->hashed());
+        $this->assertEquals($email2->hash(), $email1->hash());
     }
 
-    public function test_two_emails_with_same_value_are_equal(): void
+    public function test_can_get_domain(): void
     {
-        $email1 = new Email('test@example.com');
-        $email2 = new Email('test@example.com');
+        $email = Email::fromString('test@example.com');
 
-        $this->assertEquals($email1->value(), $email2->value());
+        $this->assertEquals('example.com', $email->domain());
     }
 
-    public function test_can_create_from_nullable(): void
+    public function test_can_get_local_part(): void
     {
-        $email = Email::fromNullable('test@example.com');
+        $email = Email::fromString('test@example.com');
 
-        $this->assertInstanceOf(Email::class, $email);
-        $this->assertEquals('test@example.com', $email->value());
+        $this->assertEquals('test', $email->localPart());
     }
 
-    public function test_returns_null_for_empty_string(): void
+    public function test_to_string_returns_value(): void
     {
-        $email = Email::fromNullable('');
+        $email = Email::fromString('test@example.com');
 
-        $this->assertNull($email);
-    }
-
-    public function test_returns_null_for_null_value(): void
-    {
-        $email = Email::fromNullable(null);
-
-        $this->assertNull($email);
+        $this->assertEquals('test@example.com', $email->toString());
     }
 }

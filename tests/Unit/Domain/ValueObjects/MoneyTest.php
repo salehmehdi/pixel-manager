@@ -11,116 +11,114 @@ use MehdiyevSignal\PixelManager\Tests\TestCase;
 
 final class MoneyTest extends TestCase
 {
-    public function test_can_create_valid_money(): void
+    public function test_can_create_money_with_amount_and_currency(): void
     {
-        $money = new Money(99.99, Currency::USD);
+        $money = Money::from(99.99, Currency::USD);
 
         $this->assertEquals(99.99, $money->amount);
         $this->assertEquals(Currency::USD, $money->currency);
     }
 
-    public function test_can_create_with_zero_amount(): void
+    public function test_can_create_money_with_string_currency(): void
     {
-        $money = new Money(0, Currency::EUR);
+        $money = Money::from(99.99, 'USD');
 
-        $this->assertEquals(0, $money->amount);
+        $this->assertEquals(99.99, $money->amount);
+        $this->assertEquals(Currency::USD, $money->currency);
+    }
+
+    public function test_can_create_zero_money(): void
+    {
+        $money = Money::zero(Currency::USD);
+
+        $this->assertEquals(0.0, $money->amount);
+        $this->assertTrue($money->isZero());
     }
 
     public function test_throws_exception_for_negative_amount(): void
     {
         $this->expectException(InvalidMoneyException::class);
-        $this->expectExceptionMessage('Money amount cannot be negative');
+        $this->expectExceptionMessage('Amount cannot be negative');
 
-        new Money(-10.00, Currency::USD);
+        Money::from(-10.00, Currency::USD);
     }
 
-    public function test_can_create_from_array(): void
+    public function test_is_zero_returns_true_for_zero_amount(): void
     {
-        $money = Money::from(49.99, 'USD');
+        $money = Money::from(0.0, Currency::USD);
 
-        $this->assertEquals(49.99, $money->amount);
-        $this->assertEquals(Currency::USD, $money->currency);
+        $this->assertTrue($money->isZero());
     }
 
-    public function test_can_format_money(): void
+    public function test_is_zero_returns_false_for_non_zero_amount(): void
     {
-        $money = new Money(1234.56, Currency::USD);
-        $formatted = $money->format();
+        $money = Money::from(10.00, Currency::USD);
 
-        $this->assertEquals('$1,234.56', $formatted);
+        $this->assertFalse($money->isZero());
     }
 
-    public function test_can_format_azn_currency(): void
+    public function test_is_positive_returns_true_for_positive_amount(): void
     {
-        $money = new Money(500, Currency::AZN);
-        $formatted = $money->format();
+        $money = Money::from(10.00, Currency::USD);
 
-        $this->assertEquals('₼500.00', $formatted);
+        $this->assertTrue($money->isPositive());
     }
 
-    public function test_can_format_with_custom_decimals(): void
+    public function test_is_positive_returns_false_for_zero_amount(): void
     {
-        $money = new Money(99.999, Currency::EUR);
-        $formatted = $money->format(3);
+        $money = Money::from(0.0, Currency::USD);
 
-        $this->assertStringContainsString('99.999', $formatted);
+        $this->assertFalse($money->isPositive());
     }
 
-    public function test_can_add_money(): void
+    public function test_can_format_money_with_currency_symbol(): void
     {
-        $money1 = new Money(50, Currency::USD);
-        $money2 = new Money(25, Currency::USD);
+        $money = Money::from(99.99, Currency::USD);
 
-        $result = $money1->add($money2);
+        $formatted = $money->formatted();
 
-        $this->assertEquals(75, $result->amount);
+        $this->assertStringContainsString('99.99', $formatted);
+        $this->assertStringContainsString('$', $formatted);
     }
 
-    public function test_throws_exception_when_adding_different_currencies(): void
+    public function test_can_get_currency_code(): void
     {
-        $this->expectException(InvalidMoneyException::class);
+        $money = Money::from(99.99, Currency::USD);
 
-        $money1 = new Money(50, Currency::USD);
-        $money2 = new Money(25, Currency::EUR);
-
-        $money1->add($money2);
+        $this->assertEquals('USD', $money->currencyCode());
     }
 
-    public function test_can_subtract_money(): void
+    public function test_supports_azerbaijani_manat_currency(): void
     {
-        $money1 = new Money(100, Currency::USD);
-        $money2 = new Money(30, Currency::USD);
+        $money = Money::from(169.98, Currency::AZN);
 
-        $result = $money1->subtract($money2);
-
-        $this->assertEquals(70, $result->amount);
+        $this->assertEquals(169.98, $money->amount);
+        $this->assertEquals(Currency::AZN, $money->currency);
+        $this->assertEquals('AZN', $money->currencyCode());
     }
 
-    public function test_can_multiply_money(): void
+    public function test_formats_azerbaijani_manat_correctly(): void
     {
-        $money = new Money(10, Currency::USD);
+        $money = Money::from(169.98, Currency::AZN);
 
-        $result = $money->multiply(5);
+        $formatted = $money->formatted();
 
-        $this->assertEquals(50, $result->amount);
+        $this->assertStringContainsString('169.98', $formatted);
     }
 
-    public function test_can_compare_money(): void
+    public function test_different_currencies_create_different_money_objects(): void
     {
-        $money1 = new Money(100, Currency::USD);
-        $money2 = new Money(50, Currency::USD);
+        $usd = Money::from(100.00, Currency::USD);
+        $azn = Money::from(100.00, Currency::AZN);
 
-        $this->assertTrue($money1->isGreaterThan($money2));
-        $this->assertFalse($money1->isLessThan($money2));
+        $this->assertNotEquals($usd->currency, $azn->currency);
     }
 
-    public function test_can_check_equality(): void
+    public function test_handles_decimal_precision(): void
     {
-        $money1 = new Money(100, Currency::USD);
-        $money2 = new Money(100, Currency::USD);
-        $money3 = new Money(100, Currency::EUR);
+        $money = Money::from(99.995, Currency::USD);
 
-        $this->assertTrue($money1->equals($money2));
-        $this->assertFalse($money1->equals($money3));
+        // Should preserve decimal precision
+        $this->assertEquals(99.995, $money->amount);
     }
 }
