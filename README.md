@@ -280,12 +280,12 @@ php artisan queue:work --queue=pixel-events
 
 ## Event Logging
 
-All events are logged to MongoDB for analytics and debugging. Access logs through the `CustomerEvent` model:
+All events are logged to MongoDB for analytics and debugging. Access logs through the `CustomerEventModel`:
 
 ```php
-use SalehSignal\PixelManager\Models\CustomerEvent;
+use MehdiyevSignal\PixelManager\Infrastructure\Persistence\MongoDB\Models\CustomerEventModel;
 
-$events = CustomerEvent::where('event_name', 'purchase')
+$events = CustomerEventModel::where('event_name', 'purchase')
     ->where('created_at', '>=', now()->subDay())
     ->get();
 ```
